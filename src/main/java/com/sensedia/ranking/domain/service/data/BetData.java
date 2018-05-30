@@ -1,8 +1,9 @@
 package com.sensedia.ranking.domain.service.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
@@ -10,19 +11,21 @@ import org.springframework.data.mongodb.core.mapping.Field;
  * Project ranking
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BetData {
 
-  @Id
+  @JsonProperty("bet_id")
   private String betId;
 
   private Long points;
 
+  @JsonProperty("registered_at")
   private LocalDateTime registeredAt;
 
-  @Field("user_id")
+  @JsonProperty("user_id")
   private String userId;
 
-  @Field("match_id")
+  @JsonProperty("match_id")
   private String matchId;
 
 }

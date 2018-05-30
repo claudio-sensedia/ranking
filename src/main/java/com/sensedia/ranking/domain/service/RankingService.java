@@ -1,14 +1,9 @@
 package com.sensedia.ranking.domain.service;
 
-import static org.springframework.data.mongodb.core.FindAndModifyOptions.options;
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
-
-import com.sensedia.ranking.domain.UserRanking;
 import com.sensedia.ranking.domain.service.data.IncrementPointRequest;
 import lombok.NonNull;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Update;
+import lombok.val;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,23 +13,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class RankingService {
 
-  private static final String RANKING_POINTS_FIELD = "points";
+  private static final String LEADER_BOARD_KEY = "leaderboard";
 
-  private static final String RANKING_BETS_FIELD = "bets";
+  private static final String ROUND_KEY = "round_%s";
 
-  private final MongoOperations mongoOperations;
+  private static final String USER_POINTS_KEY = "user:%s:points";
 
-  public RankingService(MongoOperations mongoOperations) {
-    this.mongoOperations = mongoOperations;
+  private static final String USER_BETS_KEY = "user:%s:bets";
+
+  private final RedisTemplate<String, String> redisTemplate;
+
+  public RankingService(RedisTemplate<String, String> redisTemplate) {
+    this.redisTemplate = redisTemplate;
   }
 
-  public UserRanking ranking(@NonNull IncrementPointRequest incrementPointRequest){
-    return mongoOperations.findAndModify(
-        query(where("user_id").is(incrementPointRequest.getUserId())),
-        new Update().inc(RANKING_POINTS_FIELD, incrementPointRequest.getPoints())
-            .inc(RANKING_BETS_FIELD, incrementPointRequest.getPoints()),
-        options().returnNew(true),
-        UserRanking.class);
+  public void ranking(@NonNull IncrementPointRequest incrementPointRequest) {
+    this.redisTemplate.opsForZSet()
+        .add(String.format(ROUND_KEY, incrementPointRequest.getMatchId()),
+            incrementPointRequest.getUserId(), Double.valueOf(incrementPointRequest.getPoints()));
+    val userPoints = this.redisTemplate.opsForValue()
+        .increment(String.format(USER_POINTS_KEY, incrementPointRequest.getUserId()),
+            incrementPointRequest.getPoints());
+    this.redisTemplate.opsForValue()
+        .increment(String.format(USER_BETS_KEY, incrementPointRequest.getUserId()),
+            1L);
+    this.redisTemplate.opsForZSet()
+        .add(LEADER_BOARD_KEY, incrementPointRequest.getUserId(), Double.valueOf(userPoints));
   }
 
 }
