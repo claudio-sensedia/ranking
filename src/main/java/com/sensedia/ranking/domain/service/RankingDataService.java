@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.val;
+import one.util.streamex.EntryStream;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Service;
@@ -30,10 +31,13 @@ public class RankingDataService {
     final Long rankSize = this.redisTemplate.opsForZSet().size(LEADER_BOARD_KEY);
     final Set<TypedTuple<String>> rankingRawData = this.redisTemplate.opsForZSet()
         .reverseRangeWithScores(LEADER_BOARD_KEY, 0, rankSize);
-    return rankingRawData.stream().map(tuple -> {
+    final List<TypedTuple<String>> tuples = rankingRawData.stream().collect(Collectors.toList());
+    return EntryStream.of(tuples).map((index) -> {
+      val position = index.getKey()+1;
+      val tuple = index.getValue();
       val bets = this.redisTemplate.opsForValue()
           .get(String.format(USER_BETS_KEY, tuple.getValue()));
-      return UserRanking.builder().bets(Long.valueOf(bets))
+      return UserRanking.builder().bets(Long.valueOf(bets)).position(position)
           .points(tuple.getScore().longValue()).userId(tuple.getValue()).build();
     }).collect(Collectors.toList());
   }

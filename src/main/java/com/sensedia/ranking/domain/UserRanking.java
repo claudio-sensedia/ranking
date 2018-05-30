@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserRanking {
 
+  private Integer position;
+
   @JsonProperty("user_id")
   private String userId;
 
