@@ -1,0 +1,59 @@
+swagger: '2.0'
+info:
+  description: World Cup 2018 - Ranking API's
+  version: 1.0.0
+  title: World Cup 2018 API's
+host: localhost
+basePath: /api
+schemes:
+  - https
+  - http
+paths:
+
+  '/rankings':
+    get:
+      tags:
+        - rankings
+      description: Return the current leaderboard
+      summary: Get Bet LeaderBoard
+      responses:
+        '200':
+          description: Sucessfully returns the leaderboard.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ranking'
+        '401':
+          description: Unauthorized.
+        '403':
+          description: Forbidden.
+        '404':
+          description: Not found.
+        '500':
+          description: Internal Error.
+        '504':
+          description: Gateway Timeout.
+
+definitions:
+
+  _errorMessage:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code.
+      message:
+        type: string
+        description: Error message.
+
+  ranking:
+    type: object
+    properties:
+      position:
+        type: integer
+      user_id:
+        type: string
+      bets:
+        type: integer
+      points:
+        type: integer
