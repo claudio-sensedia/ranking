@@ -1,0 +1,15 @@
+spring:
+  rabbitmq:
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
+  data:
+    mongodb:
+      database: "RANKINGS"
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+server:
+  port: 8888
+
+ranking:
+  user:
+    queue: points
