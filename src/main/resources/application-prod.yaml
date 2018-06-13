@@ -2,11 +2,17 @@ spring:
   rabbitmq:
     host: ${RABBIT_HOST}
     port: ${RABBIT_PORT}
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASS}
   data:
     mongodb:
       database: "RANKINGS"
       host: ${MONGO_HOST}
       port: ${MONGO_PORT}
+
+  redis:
+    port: ${REDIS_PORT}
+    host: ${REDIS_HOST}
 server:
   port: 8888
 

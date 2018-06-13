@@ -5,11 +5,24 @@ metadata:
   labels:
     app: ranking
 data:
-  RABBIT_HOST: "rabbitmq"
-  RABBIT_PORT: 5672
-  MONGO_HOST: "mongo"
-  MONGO_PORT: 27017
+  RABBIT_HOST: "rabbitmq-rabbitmq"
+  RABBIT_PORT: "5672"
+  MONGO_HOST: "mongodb-mongodb"
+  MONGO_PORT: "27017"
   ENV_SPRING: "prod"
+  REDIS_HOST: "redis-0"
+  REDIS_PORT: "6379"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ranking
+type: Opaque
+data:
+  MONGO_USER: c2Vuc2VkaWEtYmV0
+  MONGO_PASS: YmV0QDIwMTg=
+  RABBIT_USER: c2Vuc2VkaWEtYmV0
+  RABBIT_PASS: YmV0QDIwMTg=
 ---
 kind: Service
 apiVersion: v1
@@ -18,13 +31,11 @@ metadata:
   labels:
     app: ranking
 spec:
-  type: NodePort
   selector:
     app: ranking
   ports:
   - name: http
     port: 8888
-    nodePort: 8888
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -34,8 +45,6 @@ metadata:
     app: ranking
 spec:
   replicas: 1
-  strategy:
-    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -45,7 +54,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: ranking
-        image: sensedia_bet/ranking:1.0
+        image: gcr.io/sensedia-bet/ranking:latest
         env:
         - name: RABBIT_HOST
           valueFrom:
@@ -72,6 +81,36 @@ spec:
             configMapKeyRef:
               name: ranking
               key: ENV_SPRING
+        - name: RABBIT_USER
+          valueFrom:
+            secretKeyRef:
+              name: "game-data"
+              key: RABBIT_USER
+        - name: RABBIT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: "game-data"
+              key: RABBIT_PASS
+        - name: MONGO_USER
+          valueFrom:
+            secretKeyRef:
+              name: "game-data"
+              key: MONGO_USER
+        - name: MONGO_PASS
+          valueFrom:
+            secretKeyRef:
+              name: "game-data"
+              key: MONGO_PASS
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: ranking
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: ranking
+              key: REDIS_PORT
         ports:
         - name: http
           containerPort: 8888
