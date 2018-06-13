@@ -84,22 +84,22 @@ spec:
         - name: RABBIT_USER
           valueFrom:
             secretKeyRef:
-              name: "game-data"
+              name: ranking
               key: RABBIT_USER
         - name: RABBIT_PASS
           valueFrom:
             secretKeyRef:
-              name: "game-data"
+              name: ranking
               key: RABBIT_PASS
         - name: MONGO_USER
           valueFrom:
             secretKeyRef:
-              name: "game-data"
+              name: ranking
               key: MONGO_USER
         - name: MONGO_PASS
           valueFrom:
             secretKeyRef:
-              name: "game-data"
+              name: ranking
               key: MONGO_PASS
         - name: REDIS_HOST
           valueFrom:
@@ -120,17 +120,17 @@ spec:
             path: /actuator/health
             port: http
             scheme: HTTP
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          initialDelaySeconds: 50
+          periodSeconds: 20
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 30
         livenessProbe:
           failureThreshold: 3
           httpGet:
             path: /actuator/health
             port: http
             scheme: HTTP
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          initialDelaySeconds: 50
+          periodSeconds: 20
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 30
