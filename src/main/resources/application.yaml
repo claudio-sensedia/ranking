@@ -11,5 +11,7 @@ server:
   port: 8888
 
 ranking:
+  exchange: bets
   user:
     queue: points
+    key: points
