@@ -11,8 +11,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 /**
- * @author claudioed on 28/05/18.
- * Project ranking
+ * @author claudioed on 28/05/18. Project ranking
  */
 @Slf4j
 @Service
@@ -29,10 +28,15 @@ public class RankingProcessor {
   }
 
   @RabbitListener(queuesToDeclare = {@Queue("${ranking.user.queue}")})
-  public void process(BetData betData){
-    log.info("Recived message from rabbitmq");
-    val increment = IncrementPointRequest.builder().matchId(betData.getMatchId()).points(betData.getPoints()).userId(betData.getUserId()).build();
-    val betResult = BetResult.builder().betId(betData.getBetId()).matchId(betData.getMatchId()).points(betData.getPoints()).userId(betData.getUserId()).registeredAt(LocalDateTime.now()).build();
+  public void process(BetData betData) {
+    log.info(
+        "Recived message from rabbitmq-> betId={} matchId={} points={} registredAt={} ",
+        betData.getBetId(), betData.getMatchId(), betData.getPoints(), betData.getRegisteredAt());
+    val increment = IncrementPointRequest.builder().matchId(betData.getMatchId())
+        .points(betData.getPoints()).userId(betData.getUserId()).build();
+    val betResult = BetResult.builder().betId(betData.getBetId()).matchId(betData.getMatchId())
+        .points(betData.getPoints()).userId(betData.getUserId()).registeredAt(LocalDateTime.now())
+        .build();
     this.rankingService.ranking(increment);
     this.betResultService.register(betResult);
   }
